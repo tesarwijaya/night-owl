@@ -1,0 +1,14 @@
+version: "2"
+
+services:
+  night-owl:
+    image: github.com/tesarwijaya/night-owl:latest
+    env_file:
+      - .env
+    build:
+      context: .
+      dockerfile: dockerfiles/app.docker
+    container_name: "night-owl"
+    working_dir: /usr/src/app
+    ports:
+      - "${APP_PORT}:${APP_PORT}"
