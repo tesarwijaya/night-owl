@@ -88,7 +88,6 @@ curl --request GET \
 curl --request POST \
   --url http://localhost:8000/player \
   --header 'Content-Type: application/json' \
-  --cookie sails.sid=s%253AFy0646NNbeYbJa1asfgts4-wIf4SlYig.tPecDTjlygoIEMlYjyLgBud8kLjpjLINfzucuVzxE0I \
   --data '{
 	"name": "hazard",
 	"teamId": 1
