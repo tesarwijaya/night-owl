@@ -13,7 +13,7 @@ go run main.go
 However, it's recommended to run this project using `docker-compose` with following command
 
 ```
-docker-compose -f docker-compose.yaml up --build
+docker-compose -f docker-compose.yml up --build
 ```
 
 The app would available in `localhost:8000`, you can also set custom port by providing `APP_PORT` in `.env` file
