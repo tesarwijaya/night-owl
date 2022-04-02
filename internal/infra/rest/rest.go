@@ -6,6 +6,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/tesarwijaya/night-owl/internal/config"
+	healthz_controller "github.com/tesarwijaya/night-owl/internal/domain/healthz/controller"
 	player_controller "github.com/tesarwijaya/night-owl/internal/domain/player/controller"
 	team_controller "github.com/tesarwijaya/night-owl/internal/domain/team/controller"
 	"go.uber.org/dig"
@@ -13,8 +14,9 @@ import (
 
 type RestController struct {
 	dig.In
-	PlayerController player_controller.PlayerController
-	TeamController   team_controller.TeamController
+	HealthzController healthz_controller.HealthzController
+	PlayerController  player_controller.PlayerController
+	TeamController    team_controller.TeamController
 }
 
 type RestServer struct {
@@ -28,6 +30,7 @@ func NewRestServer(c *config.Config, controllers RestController) RestServer {
 		return c.String(http.StatusOK, "Hello, World!")
 	})
 
+	controllers.HealthzController.SetRouter(e)
 	controllers.PlayerController.SetRouter(e)
 	controllers.TeamController.SetRouter(e)
 

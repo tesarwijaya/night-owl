@@ -2,6 +2,8 @@ package main
 
 import (
 	"github.com/tesarwijaya/night-owl/internal/config"
+	"github.com/tesarwijaya/night-owl/internal/databases/sql"
+	healthz_controller "github.com/tesarwijaya/night-owl/internal/domain/healthz/controller"
 	player_controller "github.com/tesarwijaya/night-owl/internal/domain/player/controller"
 	player_repository "github.com/tesarwijaya/night-owl/internal/domain/player/repository"
 	player_service "github.com/tesarwijaya/night-owl/internal/domain/player/service"
@@ -17,6 +19,10 @@ func main() {
 
 	c.Provide(rest.NewRestServer)
 	c.Provide(config.NewConfig)
+	c.Provide(sql.NewSqlDB)
+
+	c.Provide(healthz_controller.NewHealthzController)
+
 	c.Provide(player_controller.NewPlayerController)
 	c.Provide(player_service.NewPlayerService)
 	c.Provide(player_repository.NewPlayerReposity)
