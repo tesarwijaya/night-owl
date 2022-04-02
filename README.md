@@ -18,101 +18,17 @@ docker-compose -f docker-compose.yml up --build
 
 The app would available in `localhost:8000`, you can also set custom port by providing `APP_PORT` in `.env` file
 
-## Api Docs
+## Migrations
 
-### POST /team
-
-> Create a new team
+We use golang-migrate, please install `brew install golang-migrate` to install with brew or you can see another instalation option found in their repostiory.
 
 ```
-curl --request POST \
-  --url http://localhost:8000/team \
-  --header 'Content-Type: application/json' \
-  --data '{
-	"name": "Chelsea"
-}'
+# Create migration file
+migrate create -ext sql -dir migrations/sql -seq create_team_table
 
-# Response sample
-{
-  "name": "Chelsea"
-}
-```
+# Run migration
+export POSTGRESQL_URL='postgres://root:pass@localhost:5432/night_owl_db?sslmode=disable'
+migrate -database ${POSTGRESQL_URL} -path migrations/sql up
 
-### GET /team
-
-> Get team list
-
-```
-curl --request GET \
-  --url http://localhost:8000/team
-
-# Response sample
-[
-  {
-    "id": 1,
-    "name": "Chelsea"
-  }
-]
-```
-
-### GET /team/:id/player
-
-> Get player list from a team id
-
-```
-curl --request GET \
-  --url http://localhost:8000/team/1/player
-
-# Response sample
-{
-  "id": 1,
-  "name": "Chelsea",
-  "Players": [
-    {
-      "name": "tesar",
-      "teamId": 1
-    },
-    {
-      "name": "hazard",
-      "teamId": 1
-    }
-  ]
-}
-```
-
-### POST /player
-
-> Create a new player
-
-```
-curl --request POST \
-  --url http://localhost:8000/player \
-  --header 'Content-Type: application/json' \
-  --data '{
-	"name": "hazard",
-	"teamId": 1
-}'
-
-# Response sample
-{
-  "name": "hazard",
-  "teamId": 1
-}
-```
-
-### GET /player
-
-> Get player list
-
-```
-curl --request GET \
-  --url http://localhost:8000/player
-
-# Response sample
-[
-  {
-    "name": "tesar",
-    "teamId": 1
-  }
-]
+migrate -database ${POSTGRESQL_URL} -path migrations/sql down
 ```
