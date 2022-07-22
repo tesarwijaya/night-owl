@@ -2,10 +2,12 @@ package main
 
 import (
 	"context"
+	"database/sql"
+	"fmt"
 	"time"
 
 	"github.com/tesarwijaya/night-owl/internal/config"
-	"github.com/tesarwijaya/night-owl/internal/databases/sql"
+	"github.com/tesarwijaya/night-owl/internal/databases"
 	healthz_controller "github.com/tesarwijaya/night-owl/internal/domain/healthz/controller"
 	player_controller "github.com/tesarwijaya/night-owl/internal/domain/player/controller"
 	player_repository "github.com/tesarwijaya/night-owl/internal/domain/player/repository"
@@ -22,7 +24,7 @@ func main() {
 		fx.Provide(
 			rest.NewRestServer,
 			config.NewConfig,
-			sql.NewSqlDB,
+			databases.NewSQLConnection,
 			healthz_controller.NewHealthzController,
 			player_controller.NewPlayerController,
 			player_service.NewPlayerService,
@@ -33,18 +35,36 @@ func main() {
 			team_repository.NewTeamReposity,
 			team_repository.NewTeamData,
 		),
-		fx.Invoke(func(server rest.RestServer) {
-			server.Start()
+		fx.Invoke(func(lc fx.Lifecycle, server rest.RestServer, db *sql.DB) {
+			lc.Append(fx.Hook{
+				OnStart: func(ctx context.Context) error {
+					go server.Start()
+
+					return nil
+				},
+				OnStop: func(ctx context.Context) error {
+					fmt.Println("closing db...")
+
+					return db.Close()
+				},
+			})
+
 		}),
 	)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	err := app.Start(ctx)
-	if err != nil {
+	if err := app.Start(ctx); err != nil {
 		panic(err)
 	}
 
 	<-app.Done()
+
+	ctxStop, cancelStop := context.WithTimeout(context.Background(), 15*time.Second)
+	defer cancelStop()
+
+	if err := app.Stop(ctxStop); err != nil {
+		panic(err)
+	}
 }

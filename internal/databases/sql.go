@@ -1,4 +1,4 @@
-package sql
+package databases
 
 import (
 	"database/sql"
@@ -8,7 +8,7 @@ import (
 	"github.com/tesarwijaya/night-owl/internal/config"
 )
 
-func NewSqlDB(c *config.Config) (*sql.DB, error) {
+func NewSQLConnection(c *config.Config) (*sql.DB, error) {
 	psqlconn := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable",
 		c.SqlDBHost, c.SqlDBPort, c.SqlDBUsername, c.SqlDBPassword, c.SqlDBName)
 
