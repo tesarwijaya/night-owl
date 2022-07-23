@@ -6,6 +6,7 @@ import (
 
 	"github.com/huandu/go-sqlbuilder"
 	"github.com/tesarwijaya/night-owl/internal/domain/player/model"
+	"go.uber.org/dig"
 )
 
 const (
@@ -20,6 +21,7 @@ type PlayerRepository interface {
 }
 
 type PlayerRepositoryImpl struct {
+	dig.In
 	Db *sql.DB
 }
 
@@ -63,7 +65,7 @@ func (r *PlayerRepositoryImpl) FindAll(ctx context.Context) ([]model.PlayerModel
 func (r *PlayerRepositoryImpl) FindByID(ctx context.Context, id int64) (model.PlayerModel, error) {
 	var res model.PlayerModel
 	q := sqlbuilder.NewSelectBuilder()
-	query, args := q.Select("*").From(PLAYER_TABLE_NAME).Where(q.Equal("id", id)).Build()
+	query, args := q.Select("*").From(PLAYER_TABLE_NAME).Where(q.Equal("id", id)).BuildWithFlavor(sqlbuilder.PostgreSQL)
 
 	row := r.Db.QueryRow(query, args...)
 	if err := row.Err(); err != nil {
@@ -84,7 +86,7 @@ func (r *PlayerRepositoryImpl) FindByID(ctx context.Context, id int64) (model.Pl
 func (r *PlayerRepositoryImpl) FindByTeamID(ctx context.Context, teamID int64) ([]model.PlayerModel, error) {
 	var res []model.PlayerModel
 	q := sqlbuilder.NewSelectBuilder()
-	query, args := q.Select("*").From(PLAYER_TABLE_NAME).Where(q.Equal("team_id", teamID)).Build()
+	query, args := q.Select("*").From(PLAYER_TABLE_NAME).Where(q.Equal("team_id", teamID)).BuildWithFlavor(sqlbuilder.PostgreSQL)
 
 	rows, err := r.Db.Query(query, args...)
 	if err != nil {
@@ -117,7 +119,7 @@ func (r *PlayerRepositoryImpl) Insert(ctx context.Context, payload model.PlayerM
 	query, args := q.InsertInto(PLAYER_TABLE_NAME).
 		Cols("name", "team_id").
 		Values(payload.Name, payload.TeamID).
-		Build()
+		BuildWithFlavor(sqlbuilder.PostgreSQL)
 
 	_, err := r.Db.Exec(query, args...)
 	if err != nil {

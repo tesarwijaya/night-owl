@@ -56,7 +56,7 @@ func Test_FindAll(t *testing.T) {
 			if test.ExpectedErr != "" {
 				assert.EqualError(t, err, test.ExpectedErr)
 			} else {
-				assert.Equal(t, test.ExpectedErr, actual)
+				assert.Equal(t, test.Expected, actual)
 				assert.Nil(t, err)
 			}
 		})
@@ -75,7 +75,7 @@ func Test_FindByID(t *testing.T) {
 			Name:  "when success",
 			Param: 1,
 			mockFn: func(db sqlmock.Sqlmock) {
-				db.ExpectQuery(regexp.QuoteMeta("SELECT * FROM player WHERE id = ?")).
+				db.ExpectQuery(regexp.QuoteMeta("SELECT * FROM player WHERE id = $1")).
 					WithArgs(int64(1)).
 					WillReturnRows(
 						sqlmock.NewRows([]string{"id", "name", "team_id"}).
@@ -117,7 +117,7 @@ func Test_FindByTeamID(t *testing.T) {
 			Name:  "when success",
 			Param: 1,
 			mockFn: func(db sqlmock.Sqlmock) {
-				db.ExpectQuery(regexp.QuoteMeta("SELECT * FROM player WHERE team_id = ?")).
+				db.ExpectQuery(regexp.QuoteMeta("SELECT * FROM player WHERE team_id = $1")).
 					WithArgs(int64(1)).
 					WillReturnRows(
 						sqlmock.NewRows([]string{"id", "name", "team_id"}).
@@ -162,7 +162,7 @@ func Test_Insert(t *testing.T) {
 				TeamID: 1,
 			},
 			mockFn: func(db sqlmock.Sqlmock) {
-				db.ExpectExec(regexp.QuoteMeta("INSERT INTO player (name, team_id) VALUES (?, ?)")).
+				db.ExpectExec(regexp.QuoteMeta("INSERT INTO player (name, team_id) VALUES ($1, $2)")).
 					WithArgs("some-player-name", int64(1)).
 					WillReturnResult(sqlmock.NewResult(1, 1))
 			},
