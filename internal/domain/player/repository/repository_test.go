@@ -2,46 +2,99 @@ package repository_test
 
 import (
 	"context"
-	"errors"
+	"regexp"
 	"testing"
 
+	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/stretchr/testify/assert"
 	"github.com/tesarwijaya/night-owl/internal/domain/player/model"
 	"github.com/tesarwijaya/night-owl/internal/domain/player/repository"
 )
 
+type mockFn func(db sqlmock.Sqlmock)
+
+func createRepo(mockFn mockFn) repository.PlayerRepository {
+	db, mock, _ := sqlmock.New()
+
+	mockFn(mock)
+	repo := repository.NewPlayerReposity(repository.PlayerRepositoryImpl{
+		Db: db,
+	})
+
+	return repo
+}
+
 func Test_FindAll(t *testing.T) {
 	testCases := []struct {
-		Name      string
-		Data      *repository.Data
-		Expect    []model.PlayerModel
-		ExpectErr error
+		Name        string
+		MockFn      mockFn
+		Expected    []model.PlayerModel
+		ExpectedErr string
 	}{
 		{
-			Name: "when_data_present",
-			Data: &repository.Data{
-				Data: map[int64]*model.PlayerModel{
-					1: {
-						Name: "some-player-name",
-					},
-				},
+			Name: "when success",
+			MockFn: func(db sqlmock.Sqlmock) {
+				db.ExpectQuery(regexp.QuoteMeta("SELECT * FROM player")).
+					WillReturnRows(
+						sqlmock.NewRows([]string{"id", "name", "team_id"}).
+							AddRow(int64(1), "some-player-name", int64(1)),
+					)
 			},
-			Expect: []model.PlayerModel{{
-				Name: "some-player-name",
+			Expected: []model.PlayerModel{{
+				ID:     1,
+				Name:   "some-player-name",
+				TeamID: 1,
 			}},
-		},
-		{
-			Name:      "when_data_not_found",
-			Data:      &repository.Data{},
-			ExpectErr: errors.New("data not found"),
 		},
 	}
 
 	for _, test := range testCases {
 		t.Run(test.Name, func(t *testing.T) {
-			repo := repository.NewPlayerReposity(test.Data)
+			repo := createRepo(test.MockFn)
 
 			actual, err := repo.FindAll(context.Background())
+			if test.ExpectedErr != "" {
+				assert.EqualError(t, err, test.ExpectedErr)
+			} else {
+				assert.Equal(t, test.ExpectedErr, actual)
+				assert.Nil(t, err)
+			}
+		})
+	}
+}
+
+func Test_FindByID(t *testing.T) {
+	testCases := []struct {
+		Name      string
+		Param     int64
+		mockFn    mockFn
+		Expect    model.PlayerModel
+		ExpectErr error
+	}{
+		{
+			Name:  "when success",
+			Param: 1,
+			mockFn: func(db sqlmock.Sqlmock) {
+				db.ExpectQuery(regexp.QuoteMeta("SELECT * FROM player WHERE id = ?")).
+					WithArgs(int64(1)).
+					WillReturnRows(
+						sqlmock.NewRows([]string{"id", "name", "team_id"}).
+							AddRow(int64(1), "some-player-name", int64(1)),
+					)
+			},
+			Expect: model.PlayerModel{
+				ID:     1,
+				Name:   "some-player-name",
+				TeamID: 1,
+			},
+		},
+	}
+
+	for _, test := range testCases {
+		t.Run(test.Name, func(t *testing.T) {
+			repo := createRepo(test.mockFn)
+
+			actual, err := repo.FindByID(context.Background(), test.Param)
 			if test.ExpectErr == nil {
 				assert.Equal(t, test.Expect, actual)
 				assert.Nil(t, err)
@@ -52,97 +105,36 @@ func Test_FindAll(t *testing.T) {
 	}
 }
 
-func Test_FindByID(t *testing.T) {
-	testCases := []struct {
-		Name      string
-		Data      *repository.Data
-		Param     int64
-		Expect    model.PlayerModel
-		ExpectErr error
-	}{
-		{
-			Name: "when_data_present",
-			Data: &repository.Data{
-				Data: map[int64]*model.PlayerModel{
-					1: {
-						Name: "some-player-name",
-					},
-				},
-			},
-			Param: 1,
-			Expect: model.PlayerModel{
-				Name: "some-player-name",
-			},
-		},
-		{
-			Name: "when_data_not_present",
-			Data: &repository.Data{
-				Data: map[int64]*model.PlayerModel{
-					1: {
-						Name: "some-player-name",
-					},
-				},
-			},
-			Param:     2,
-			ExpectErr: errors.New("data not found"),
-		},
-	}
-
-	for _, test := range testCases {
-		repo := repository.NewPlayerReposity(test.Data)
-
-		actual, err := repo.FindByID(context.Background(), test.Param)
-		if test.ExpectErr == nil {
-			assert.Equal(t, test.Expect, actual)
-			assert.Nil(t, err)
-		}
-
-		assert.Equal(t, test.ExpectErr, err)
-	}
-}
-
 func Test_FindByTeamID(t *testing.T) {
 	testCases := []struct {
 		Name      string
 		Param     int64
-		Data      *repository.Data
+		mockFn    mockFn
 		Expect    []model.PlayerModel
 		ExpectErr error
 	}{
 		{
-			Name:  "when_data_present",
+			Name:  "when success",
 			Param: 1,
-			Data: &repository.Data{
-				Data: map[int64]*model.PlayerModel{
-					1: {
-						Name:   "some-player-name",
-						TeamID: 1,
-					},
-				},
+			mockFn: func(db sqlmock.Sqlmock) {
+				db.ExpectQuery(regexp.QuoteMeta("SELECT * FROM player WHERE team_id = ?")).
+					WithArgs(int64(1)).
+					WillReturnRows(
+						sqlmock.NewRows([]string{"id", "name", "team_id"}).
+							AddRow(1, "some-player-name", 1),
+					)
 			},
 			Expect: []model.PlayerModel{{
+				ID:     1,
 				Name:   "some-player-name",
 				TeamID: 1,
 			}},
-		},
-		{
-			Name:  "when_data_not_found",
-			Param: 2,
-			Data: &repository.Data{
-				Data: map[int64]*model.PlayerModel{
-					1: {
-						Name:   "some-player-name",
-						TeamID: 1,
-					},
-				},
-			},
-			ExpectErr: errors.New("data not found"),
 		},
 	}
 
 	for _, test := range testCases {
 		t.Run(test.Name, func(t *testing.T) {
-			repo := repository.NewPlayerReposity(test.Data)
+			repo := createRepo(test.mockFn)
 
 			actual, err := repo.FindByTeamID(context.Background(), test.Param)
 			if test.ExpectErr == nil {
@@ -158,27 +150,32 @@ func Test_FindByTeamID(t *testing.T) {
 func Test_Insert(t *testing.T) {
 	testCases := []struct {
 		Name      string
-		Data      *repository.Data
 		Param     model.PlayerModel
+		mockFn    mockFn
 		Expect    model.PlayerModel
 		ExpectErr error
 	}{
 		{
 			Name: "when_successful",
-			Data: &repository.Data{
-				Data: map[int64]*model.PlayerModel{},
-			},
 			Param: model.PlayerModel{
-				Name: "some-player-name",
+				Name:   "some-player-name",
+				TeamID: 1,
+			},
+			mockFn: func(db sqlmock.Sqlmock) {
+				db.ExpectExec(regexp.QuoteMeta("INSERT INTO player (name, team_id) VALUES (?, ?)")).
+					WithArgs("some-player-name", int64(1)).
+					WillReturnResult(sqlmock.NewResult(1, 1))
 			},
 		},
 	}
 
 	for _, test := range testCases {
-		repo := repository.NewPlayerReposity(test.Data)
+		t.Run(test.Name, func(t *testing.T) {
+			repo := createRepo(test.mockFn)
 
-		err := repo.Insert(context.Background(), test.Param)
+			err := repo.Insert(context.Background(), test.Param)
 
-		assert.Equal(t, test.ExpectErr, err)
+			assert.Equal(t, test.ExpectErr, err)
+		})
 	}
 }

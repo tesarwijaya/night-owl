@@ -2,24 +2,15 @@ package repository
 
 import (
 	"context"
-	"errors"
-	"sync"
+	"database/sql"
 
+	"github.com/huandu/go-sqlbuilder"
 	"github.com/tesarwijaya/night-owl/internal/domain/player/model"
 )
 
-var i int64
-
-type Data struct {
-	mu   sync.Mutex
-	Data map[int64]*model.PlayerModel
-}
-
-func NewPlayerData() *Data {
-	return &Data{
-		Data: map[int64]*model.PlayerModel{},
-	}
-}
+const (
+	PLAYER_TABLE_NAME = "player"
+)
 
 type PlayerRepository interface {
 	FindAll(ctx context.Context) ([]model.PlayerModel, error)
@@ -29,63 +20,109 @@ type PlayerRepository interface {
 }
 
 type PlayerRepositoryImpl struct {
-	Data *Data
+	Db *sql.DB
 }
 
-func NewPlayerReposity(data *Data) PlayerRepository {
-	return &PlayerRepositoryImpl{
-		Data: data,
-	}
+func NewPlayerReposity(repo PlayerRepositoryImpl) PlayerRepository {
+	return &repo
 }
 
 func (r *PlayerRepositoryImpl) FindAll(ctx context.Context) ([]model.PlayerModel, error) {
 	var res []model.PlayerModel
-	for _, v := range r.Data.Data {
-		res = append(res, *v)
+	q := sqlbuilder.NewSelectBuilder()
+	query, _ := q.Select("*").From(PLAYER_TABLE_NAME).Build()
+
+	rows, err := r.Db.Query(query)
+	if err != nil {
+		return []model.PlayerModel{}, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var item model.PlayerModel
+
+		if err = rows.Scan(
+			&item.ID,
+			&item.Name,
+			&item.TeamID,
+		); err != nil {
+			return []model.PlayerModel{}, err
+		}
+
+		res = append(res, item)
 	}
 
-	if len(res) == 0 {
-		return nil, errors.New("data not found")
+	err = rows.Err()
+	if err != nil {
+		return []model.PlayerModel{}, err
 	}
 
 	return res, nil
 }
 
 func (r *PlayerRepositoryImpl) FindByID(ctx context.Context, id int64) (model.PlayerModel, error) {
-	var res *model.PlayerModel
-	for k, v := range r.Data.Data {
-		if k == id {
-			res = v
-		}
+	var res model.PlayerModel
+	q := sqlbuilder.NewSelectBuilder()
+	query, args := q.Select("*").From(PLAYER_TABLE_NAME).Where(q.Equal("id", id)).Build()
+
+	row := r.Db.QueryRow(query, args...)
+	if err := row.Err(); err != nil {
+		return model.PlayerModel{}, err
 	}
 
-	if res == nil {
-		return model.PlayerModel{}, errors.New("data not found")
+	if err := row.Scan(
+		&res.ID,
+		&res.Name,
+		&res.TeamID,
+	); err != nil {
+		return model.PlayerModel{}, err
 	}
 
-	return *res, nil
+	return res, nil
 }
 
 func (r *PlayerRepositoryImpl) FindByTeamID(ctx context.Context, teamID int64) ([]model.PlayerModel, error) {
 	var res []model.PlayerModel
-	for _, v := range r.Data.Data {
-		if v.TeamID == teamID {
-			res = append(res, *v)
+	q := sqlbuilder.NewSelectBuilder()
+	query, args := q.Select("*").From(PLAYER_TABLE_NAME).Where(q.Equal("team_id", teamID)).Build()
+
+	rows, err := r.Db.Query(query, args...)
+	if err != nil {
+		return []model.PlayerModel{}, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var item model.PlayerModel
+		if err := rows.Scan(
+			&item.ID,
+			&item.Name,
+			&item.TeamID,
+		); err != nil {
+			return []model.PlayerModel{}, err
 		}
+
+		res = append(res, item)
 	}
 
-	if len(res) == 0 {
-		return nil, errors.New("data not found")
+	if err = rows.Err(); err != nil {
+		return []model.PlayerModel{}, err
 	}
 
 	return res, nil
 }
 
 func (r *PlayerRepositoryImpl) Insert(ctx context.Context, payload model.PlayerModel) error {
-	r.Data.mu.Lock()
-	defer r.Data.mu.Unlock()
+	q := sqlbuilder.NewInsertBuilder()
+	query, args := q.InsertInto(PLAYER_TABLE_NAME).
+		Cols("name", "team_id").
+		Values(payload.Name, payload.TeamID).
+		Build()
 
-	i++
-	r.Data.Data[i] = &payload
+	_, err := r.Db.Exec(query, args...)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }

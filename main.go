@@ -29,7 +29,6 @@ func main() {
 			player_controller.NewPlayerController,
 			player_service.NewPlayerService,
 			player_repository.NewPlayerReposity,
-			player_repository.NewPlayerData,
 			team_controller.NewTeamController,
 			team_service.NewTeamService,
 			team_repository.NewTeamReposity,

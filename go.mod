@@ -3,7 +3,9 @@ module github.com/tesarwijaya/night-owl
 go 1.15
 
 require (
+	github.com/DATA-DOG/go-sqlmock v1.5.0
 	github.com/golang/mock v1.6.0
+	github.com/huandu/go-sqlbuilder v1.14.1
 	github.com/joho/godotenv v1.4.0
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/kr/pretty v0.1.0 // indirect
