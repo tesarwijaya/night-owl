@@ -1,6 +1,6 @@
 # Night Owl
 
-> Simple API
+> Night owl is a boilerplate project which have goals to reduce overhead indirection and make it easier to navigate through the project by defining clearer separation of concern
 
 ## How to run
 
