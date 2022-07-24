@@ -2,24 +2,15 @@ package repository
 
 import (
 	"context"
-	"errors"
-	"sync"
+	"database/sql"
 
+	"github.com/huandu/go-sqlbuilder"
 	"github.com/tesarwijaya/night-owl/internal/domain/team/model"
 )
 
-var i int64 = 0
-
-type Data struct {
-	mu   sync.Mutex
-	Data map[int64]*model.TeamModel
-}
-
-func NewTeamData() *Data {
-	return &Data{
-		Data: map[int64]*model.TeamModel{},
-	}
-}
+const (
+	TEAM_TABLE_NAME = "team"
+)
 
 type TeamRepository interface {
 	FindAll(ctx context.Context) ([]model.TeamModel, error)
@@ -28,49 +19,73 @@ type TeamRepository interface {
 }
 
 type TeamRepositoryImpl struct {
-	Data *Data
+	Db *sql.DB
 }
 
-func NewTeamReposity(data *Data) TeamRepository {
-	return &TeamRepositoryImpl{
-		Data: data,
-	}
+func NewTeamReposity(repo TeamRepositoryImpl) TeamRepository {
+	return &repo
 }
 
 func (r *TeamRepositoryImpl) FindAll(ctx context.Context) ([]model.TeamModel, error) {
 	var res []model.TeamModel
-	for _, v := range r.Data.Data {
-		res = append(res, *v)
+	q := sqlbuilder.NewSelectBuilder()
+	query, _ := q.Select("*").From(TEAM_TABLE_NAME).BuildWithFlavor(sqlbuilder.PostgreSQL)
+
+	rows, err := r.Db.Query(query)
+	if err != nil {
+		return []model.TeamModel{}, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var item model.TeamModel
+
+		if err = rows.Scan(
+			&item.ID,
+			&item.Name,
+		); err != nil {
+			return []model.TeamModel{}, err
+		}
+
+		res = append(res, item)
 	}
 
-	if len(res) == 0 {
-		return nil, errors.New("data not found")
+	if err = rows.Err(); err != nil {
+		return []model.TeamModel{}, err
 	}
 
 	return res, nil
 }
 
 func (r *TeamRepositoryImpl) FindByID(ctx context.Context, id int64) (model.TeamModel, error) {
-	var res *model.TeamModel
-	for k, v := range r.Data.Data {
-		if k == id {
-			res = v
-		}
+	var res model.TeamModel
+	q := sqlbuilder.NewSelectBuilder()
+	query, args := q.Select("*").From(TEAM_TABLE_NAME).Where(q.Equal("id", id)).BuildWithFlavor(sqlbuilder.PostgreSQL)
+
+	row := r.Db.QueryRow(query, args...)
+	if err := row.Err(); err != nil {
+		return model.TeamModel{}, err
 	}
 
-	if res == nil {
-		return model.TeamModel{}, errors.New("data not found")
+	if err := row.Scan(
+		&res.ID,
+		&res.Name,
+	); err != nil {
+		return model.TeamModel{}, err
 	}
 
-	return *res, nil
+	return res, nil
 }
 
 func (r *TeamRepositoryImpl) Insert(ctx context.Context, payload model.TeamModel) error {
-	r.Data.mu.Lock()
-	defer r.Data.mu.Unlock()
+	q := sqlbuilder.NewInsertBuilder()
 
-	i++
-	payload.ID = i
-	r.Data.Data[i] = &payload
+	query, args := q.Cols("name").Values(payload.Name).BuildWithFlavor(sqlbuilder.PostgreSQL)
+
+	_, err := r.Db.Exec(query, args...)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }

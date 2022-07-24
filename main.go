@@ -32,7 +32,6 @@ func main() {
 			team_controller.NewTeamController,
 			team_service.NewTeamService,
 			team_repository.NewTeamReposity,
-			team_repository.NewTeamData,
 		),
 		fx.Invoke(func(lc fx.Lifecycle, server rest.RestServer, db *sql.DB) {
 			lc.Append(fx.Hook{
