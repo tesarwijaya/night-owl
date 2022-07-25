@@ -5,6 +5,8 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo/v4"
+	echoSwagger "github.com/swaggo/echo-swagger"
+	_ "github.com/tesarwijaya/night-owl/docs"
 	"github.com/tesarwijaya/night-owl/internal/config"
 	healthz_controller "github.com/tesarwijaya/night-owl/internal/domain/healthz/controller"
 	player_controller "github.com/tesarwijaya/night-owl/internal/domain/player/controller"
@@ -24,11 +26,27 @@ type RestServer struct {
 	Config *config.Config
 }
 
+// @title           Night owl API
+// @version         1.0
+// @description     Night owl API documentation.
+// @termsOfService  http://swagger.io/terms/
+
+// @contact.name   API Support
+// @contact.url    http://www.swagger.io/support
+// @contact.email  support@swagger.io
+
+// @license.name  Apache 2.0
+// @license.url   http://www.apache.org/licenses/LICENSE-2.0.html
+
+// @host      localhost:8080
+// @BasePath  /
 func NewRestServer(c *config.Config, controllers RestController) RestServer {
 	e := echo.New()
 	e.GET("/", func(c echo.Context) error {
 		return c.String(http.StatusOK, "Hello, World!")
 	})
+
+	e.GET("/swagger/*", echoSwagger.WrapHandler)
 
 	controllers.HealthzController.SetRouter(e)
 	controllers.PlayerController.SetRouter(e)

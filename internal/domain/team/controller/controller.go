@@ -26,6 +26,17 @@ func (c *TeamController) SetRouter(ec *echo.Echo) {
 	ec.POST("/team", c.Insert)
 }
 
+// FindAll godoc
+// @Summary      Show all team
+// @Description  get all team
+// @Tags         Team
+// @Accept       json
+// @Produce      json
+// @Success      200  {object}  []model.TeamModel
+// @Failure      400  {object}  echo.HTTPError
+// @Failure      404  {object}  echo.HTTPError
+// @Failure      500  {object}  echo.HTTPError
+// @Router       /team [get]
 func (c *TeamController) FindAll(ec echo.Context) error {
 	res, err := c.Service.FindAll(ec.Request().Context())
 	if err != nil {

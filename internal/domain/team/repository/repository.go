@@ -6,6 +6,7 @@ import (
 
 	"github.com/huandu/go-sqlbuilder"
 	"github.com/tesarwijaya/night-owl/internal/domain/team/model"
+	"go.uber.org/dig"
 )
 
 const (
@@ -19,6 +20,7 @@ type TeamRepository interface {
 }
 
 type TeamRepositoryImpl struct {
+	dig.In
 	Db *sql.DB
 }
 
