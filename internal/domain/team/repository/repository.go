@@ -82,7 +82,8 @@ func (r *TeamRepositoryImpl) FindByID(ctx context.Context, id int64) (model.Team
 func (r *TeamRepositoryImpl) Insert(ctx context.Context, payload model.TeamModel) error {
 	q := sqlbuilder.NewInsertBuilder()
 
-	query, args := q.Cols("name").Values(payload.Name).BuildWithFlavor(sqlbuilder.PostgreSQL)
+	query, args := q.InsertInto(TEAM_TABLE_NAME).Cols("name").Values(payload.Name).
+		BuildWithFlavor(sqlbuilder.PostgreSQL)
 
 	_, err := r.Db.Exec(query, args...)
 	if err != nil {

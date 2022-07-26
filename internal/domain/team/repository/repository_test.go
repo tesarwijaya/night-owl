@@ -111,7 +111,7 @@ func Test_Insert(t *testing.T) {
 				Name: "some-team-name",
 			},
 			MockFn: func(db sqlmock.Sqlmock) {
-				db.ExpectExec(regexp.QuoteMeta("INSERT INTO (name) VALUES ($1)")).WithArgs("some-team-name").
+				db.ExpectExec(regexp.QuoteMeta("INSERT INTO team (name) VALUES ($1)")).WithArgs("some-team-name").
 					WillReturnResult(sqlmock.NewResult(1, 1))
 			},
 		},
