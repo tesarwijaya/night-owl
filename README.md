@@ -7,7 +7,7 @@
 You can simply run the project using following command
 
 ```
-go run main.go
+go run main.go server-start
 ```
 
 However, it's recommended to run this project using `docker-compose` with following command

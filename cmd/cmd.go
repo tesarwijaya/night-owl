@@ -1,0 +1,82 @@
+package cmd
+
+import (
+	"context"
+	"database/sql"
+	"fmt"
+	"time"
+
+	"github.com/tesarwijaya/night-owl/internal/config"
+	healthz_service "github.com/tesarwijaya/night-owl/internal/domain/healthz/service"
+	player_repository "github.com/tesarwijaya/night-owl/internal/domain/player/repository"
+	player_service "github.com/tesarwijaya/night-owl/internal/domain/player/service"
+	team_repository "github.com/tesarwijaya/night-owl/internal/domain/team/repository"
+	team_service "github.com/tesarwijaya/night-owl/internal/domain/team/service"
+	"github.com/tesarwijaya/night-owl/internal/entry-point/rest"
+	healthz_controller "github.com/tesarwijaya/night-owl/internal/entry-point/rest/controller/healthz"
+	player_controller "github.com/tesarwijaya/night-owl/internal/entry-point/rest/controller/player"
+	team_controller "github.com/tesarwijaya/night-owl/internal/entry-point/rest/controller/team"
+	"github.com/tesarwijaya/night-owl/internal/resource"
+	"github.com/urfave/cli/v2"
+	"go.uber.org/fx"
+)
+
+func NewCmd() *cli.App {
+	server := newApp(func(lc fx.Lifecycle, server rest.RestServer, db *sql.DB) {
+		lc.Append(fx.Hook{
+			OnStart: func(ctx context.Context) error {
+				go server.Start()
+
+				return nil
+			},
+			OnStop: func(ctx context.Context) error {
+				fmt.Println("closing db...")
+
+				return db.Close()
+			},
+		})
+	})
+
+	return &cli.App{
+		Name:  "server-start",
+		Usage: "start the fcking server!",
+		Action: func(*cli.Context) error {
+			ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+			defer cancel()
+
+			if err := server.Start(ctx); err != nil {
+				panic(err)
+			}
+
+			<-server.Done()
+
+			ctxStop, cancelStop := context.WithTimeout(context.Background(), 15*time.Second)
+			defer cancelStop()
+
+			if err := server.Stop(ctxStop); err != nil {
+				panic(err)
+			}
+
+			return nil
+		},
+	}
+}
+
+func newApp(invoker ...interface{}) *fx.App {
+	return fx.New(
+		fx.Provide(
+			rest.NewRestServer,
+			config.NewConfig,
+			resource.NewSQLConnection,
+			healthz_controller.NewHealthzController,
+			healthz_service.NewHealthzService,
+			player_controller.NewPlayerController,
+			player_service.NewPlayerService,
+			player_repository.NewPlayerReposity,
+			team_controller.NewTeamController,
+			team_service.NewTeamService,
+			team_repository.NewTeamReposity,
+		),
+		fx.Invoke(invoker...),
+	)
+}
