@@ -11,9 +11,9 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"
-	"github.com/tesarwijaya/night-owl/internal/domain/team/controller"
 	"github.com/tesarwijaya/night-owl/internal/domain/team/model"
 	"github.com/tesarwijaya/night-owl/internal/domain/team/service"
+	controller "github.com/tesarwijaya/night-owl/internal/infra/rest/controller/team"
 )
 
 type ResolverFn func(svc *service.MockTeamService)
