@@ -22,27 +22,27 @@ import (
 )
 
 func NewCmd() *cli.App {
-	server := newApp(func(lc fx.Lifecycle, server rest.RestServer, db *sql.DB) {
-		lc.Append(fx.Hook{
-			OnStart: func(ctx context.Context) error {
-				go server.Start()
-
-				return nil
-			},
-			OnStop: func(ctx context.Context) error {
-				fmt.Println("closing db...")
-
-				return db.Close()
-			},
-		})
-	})
-
 	return &cli.App{
 		Commands: []*cli.Command{
 			{
 				Name:  "server-start",
 				Usage: "start the fcking server!",
 				Action: func(*cli.Context) error {
+					server := newApp(func(lc fx.Lifecycle, server rest.RestServer, db *sql.DB) {
+						lc.Append(fx.Hook{
+							OnStart: func(ctx context.Context) error {
+								go server.Start()
+
+								return nil
+							},
+							OnStop: func(ctx context.Context) error {
+								fmt.Println("closing db...")
+
+								return db.Close()
+							},
+						})
+					})
+
 					ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 					defer cancel()
 
