@@ -25,6 +25,17 @@ func (c *PlayerController) SetRouter(ec *echo.Echo) {
 	ec.POST("/player", c.Insert)
 }
 
+// FindAll godoc
+// @Summary      Show all player
+// @Description  get all player
+// @Tags         Player
+// @Accept       json
+// @Produce      json
+// @Success      200  {object}  []model.PlayerModel
+// @Failure      400  {object}  echo.HTTPError
+// @Failure      404  {object}  echo.HTTPError
+// @Failure      500  {object}  echo.HTTPError
+// @Router       /player [get]
 func (c *PlayerController) FindAll(ec echo.Context) error {
 	res, err := c.Service.FindAll(ec.Request().Context())
 	if err != nil {
@@ -34,6 +45,18 @@ func (c *PlayerController) FindAll(ec echo.Context) error {
 	return ec.JSON(http.StatusOK, res)
 }
 
+// FindByID godoc
+// @Summary      Get player by id
+// @Description  get player by id
+// @Tags         Player
+// @Accept       json
+// @Produce      json
+// @param        id path int true "player id"
+// @Success      200  {object}  model.PlayerModel
+// @Failure      400  {object}  echo.HTTPError
+// @Failure      404  {object}  echo.HTTPError
+// @Failure      500  {object}  echo.HTTPError
+// @Router       /player/{id} [get]
 func (c *PlayerController) FindByID(ec echo.Context) error {
 	idParam := ec.Param("id")
 	id, err := strconv.ParseInt(idParam, 10, 64)
@@ -49,6 +72,18 @@ func (c *PlayerController) FindByID(ec echo.Context) error {
 	return ec.JSON(http.StatusOK, res)
 }
 
+// Insert godoc
+// @Summary      Insert player
+// @Description  insert a player with team id
+// @Tags         Player
+// @Accept       json
+// @Produce      json
+// @param        id body model.PlayerModel true "body"
+// @Success      200  {object}  model.PlayerModel
+// @Failure      400  {object}  echo.HTTPError
+// @Failure      404  {object}  echo.HTTPError
+// @Failure      500  {object}  echo.HTTPError
+// @Router       /player [post]
 func (c *PlayerController) Insert(ec echo.Context) error {
 	var payload model.PlayerModel
 
