@@ -8,7 +8,7 @@ import (
 
 	"github.com/tesarwijaya/night-owl/internal/config"
 	"github.com/tesarwijaya/night-owl/internal/databases"
-	healthz_controller "github.com/tesarwijaya/night-owl/internal/domain/healthz/controller"
+	healthz_service "github.com/tesarwijaya/night-owl/internal/domain/healthz/service"
 	player_controller "github.com/tesarwijaya/night-owl/internal/domain/player/controller"
 	player_repository "github.com/tesarwijaya/night-owl/internal/domain/player/repository"
 	player_service "github.com/tesarwijaya/night-owl/internal/domain/player/service"
@@ -16,6 +16,7 @@ import (
 	team_repository "github.com/tesarwijaya/night-owl/internal/domain/team/repository"
 	team_service "github.com/tesarwijaya/night-owl/internal/domain/team/service"
 	"github.com/tesarwijaya/night-owl/internal/infra/rest"
+	healthz_controller "github.com/tesarwijaya/night-owl/internal/infra/rest/controller/healthz"
 	"go.uber.org/fx"
 )
 
@@ -26,6 +27,7 @@ func main() {
 			config.NewConfig,
 			databases.NewSQLConnection,
 			healthz_controller.NewHealthzController,
+			healthz_service.NewHealthzService,
 			player_controller.NewPlayerController,
 			player_service.NewPlayerService,
 			player_repository.NewPlayerReposity,
