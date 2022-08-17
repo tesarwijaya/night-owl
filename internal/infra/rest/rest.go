@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 	echoSwagger "github.com/swaggo/echo-swagger"
 	_ "github.com/tesarwijaya/night-owl/docs"
 	"github.com/tesarwijaya/night-owl/internal/config"
@@ -26,22 +27,28 @@ type RestServer struct {
 	Config *config.Config
 }
 
-// @title           Night owl API
-// @version         1.0
-// @description     Night owl API documentation.
-// @termsOfService  http://swagger.io/terms/
+// @title          Night owl API
+// @version        1.0
+// @description    Night owl API documentation.
+// @termsOfService http://swagger.io/terms/
 
-// @contact.name   API Support
-// @contact.url    http://www.swagger.io/support
-// @contact.email  support@swagger.io
+// @contact.name  API Support
+// @contact.url   http://www.swagger.io/support
+// @contact.email support@swagger.io
 
-// @license.name  Apache 2.0
-// @license.url   http://www.apache.org/licenses/LICENSE-2.0.html
+// @license.name Apache 2.0
+// @license.url  http://www.apache.org/licenses/LICENSE-2.0.html
 
-// @host      localhost:8080
-// @BasePath  /
+// @host     localhost:8000
+// @BasePath /
 func NewRestServer(c *config.Config, controllers RestController) RestServer {
 	e := echo.New()
+	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
+		AllowOrigins: []string{"*"},
+		AllowHeaders: []string{"*"},
+		AllowMethods: []string{http.MethodGet, http.MethodPut, http.MethodPost, http.MethodDelete},
+	}))
+
 	e.GET("/", func(c echo.Context) error {
 		return c.String(http.StatusOK, "Hello, World!")
 	})
