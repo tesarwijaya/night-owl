@@ -57,7 +57,7 @@ func (c *TeamController) FindAll(ec echo.Context) error {
 // @Failure      400  {object}  echo.HTTPError
 // @Failure      404  {object}  echo.HTTPError
 // @Failure      500  {object}  echo.HTTPError
-// @Router       /team/:id [get]
+// @Router       /team/{id} [get]
 func (c *TeamController) FindByID(ec echo.Context) error {
 	idParam := ec.Param("id")
 	id, err := strconv.ParseInt(idParam, 10, 64)
