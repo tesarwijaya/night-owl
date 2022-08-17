@@ -9,7 +9,6 @@ import (
 	"github.com/tesarwijaya/night-owl/internal/config"
 	"github.com/tesarwijaya/night-owl/internal/databases"
 	healthz_service "github.com/tesarwijaya/night-owl/internal/domain/healthz/service"
-	player_controller "github.com/tesarwijaya/night-owl/internal/domain/player/controller"
 	player_repository "github.com/tesarwijaya/night-owl/internal/domain/player/repository"
 	player_service "github.com/tesarwijaya/night-owl/internal/domain/player/service"
 	team_controller "github.com/tesarwijaya/night-owl/internal/domain/team/controller"
@@ -17,6 +16,7 @@ import (
 	team_service "github.com/tesarwijaya/night-owl/internal/domain/team/service"
 	"github.com/tesarwijaya/night-owl/internal/infra/rest"
 	healthz_controller "github.com/tesarwijaya/night-owl/internal/infra/rest/controller/healthz"
+	player_controller "github.com/tesarwijaya/night-owl/internal/infra/rest/controller/player"
 	"go.uber.org/fx"
 )
 

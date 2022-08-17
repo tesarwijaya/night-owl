@@ -11,9 +11,9 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"
-	"github.com/tesarwijaya/night-owl/internal/domain/player/controller"
 	"github.com/tesarwijaya/night-owl/internal/domain/player/model"
 	"github.com/tesarwijaya/night-owl/internal/domain/player/service"
+	controller "github.com/tesarwijaya/night-owl/internal/infra/rest/controller/player"
 )
 
 type ResolverFn func(svc *service.MockPlayerService)
@@ -44,7 +44,7 @@ func Test_FindAll(t *testing.T) {
 					Return([]model.PlayerModel{{Name: "some-player-name"}}, nil)
 			},
 			ExpectStatusCode: 200,
-			ExpectBody:       "[{\"name\":\"some-player-name\"}]\n",
+			ExpectBody:       "[{\"id\":0,\"name\":\"some-player-name\"}]\n",
 		},
 		{
 			Name: "when_not_success",
@@ -94,7 +94,7 @@ func Test_FindByID(t *testing.T) {
 					Return(model.PlayerModel{Name: "some-player-name"}, nil)
 			},
 			ExpectStatusCode: 200,
-			ExpectBody:       "{\"name\":\"some-player-name\"}\n",
+			ExpectBody:       "{\"id\":0,\"name\":\"some-player-name\"}\n",
 		},
 	}
 
@@ -137,7 +137,7 @@ func Test_Insert(t *testing.T) {
 					Return(model.PlayerModel{Name: "some-player-name"}, nil)
 			},
 			ExpectStatusCode: 200,
-			ExpectBody:       "{\"name\":\"some-player-name\"}\n",
+			ExpectBody:       "{\"id\":0,\"name\":\"some-player-name\"}\n",
 		},
 	}
 
