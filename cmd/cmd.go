@@ -38,26 +38,30 @@ func NewCmd() *cli.App {
 	})
 
 	return &cli.App{
-		Name:  "server-start",
-		Usage: "start the fcking server!",
-		Action: func(*cli.Context) error {
-			ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-			defer cancel()
+		Commands: []*cli.Command{
+			{
+				Name:  "server-start",
+				Usage: "start the fcking server!",
+				Action: func(*cli.Context) error {
+					ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+					defer cancel()
 
-			if err := server.Start(ctx); err != nil {
-				panic(err)
-			}
+					if err := server.Start(ctx); err != nil {
+						panic(err)
+					}
 
-			<-server.Done()
+					<-server.Done()
 
-			ctxStop, cancelStop := context.WithTimeout(context.Background(), 15*time.Second)
-			defer cancelStop()
+					ctxStop, cancelStop := context.WithTimeout(context.Background(), 15*time.Second)
+					defer cancelStop()
 
-			if err := server.Stop(ctxStop); err != nil {
-				panic(err)
-			}
+					if err := server.Stop(ctxStop); err != nil {
+						panic(err)
+					}
 
-			return nil
+					return nil
+				},
+			},
 		},
 	}
 }
