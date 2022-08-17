@@ -38,7 +38,7 @@ migrate -database ${POSTGRESQL_URL} -path migrations/sql down
 We use swaggo to documented our endpoint, use these following command in root folder to generate specs
 
 ```
-swag init -g internal/infra/rest/rest.go --parseDependency
+swag init -g internal/entry-point/rest/rest.go --parseDependency
 ```
 
 Please refer to official repository for [annotation](https://github.com/swaggo/swag#declarative-comments-format)

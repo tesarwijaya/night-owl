@@ -9,9 +9,9 @@ import (
 	echoSwagger "github.com/swaggo/echo-swagger"
 	_ "github.com/tesarwijaya/night-owl/docs"
 	"github.com/tesarwijaya/night-owl/internal/config"
-	healthz_controller "github.com/tesarwijaya/night-owl/internal/infra/rest/controller/healthz"
-	player_controller "github.com/tesarwijaya/night-owl/internal/infra/rest/controller/player"
-	team_controller "github.com/tesarwijaya/night-owl/internal/infra/rest/controller/team"
+	healthz_controller "github.com/tesarwijaya/night-owl/internal/entry-point/rest/controller/healthz"
+	player_controller "github.com/tesarwijaya/night-owl/internal/entry-point/rest/controller/player"
+	team_controller "github.com/tesarwijaya/night-owl/internal/entry-point/rest/controller/team"
 	"go.uber.org/dig"
 )
 

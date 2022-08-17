@@ -13,7 +13,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/tesarwijaya/night-owl/internal/domain/player/model"
 	"github.com/tesarwijaya/night-owl/internal/domain/player/service"
-	controller "github.com/tesarwijaya/night-owl/internal/infra/rest/controller/player"
+	controller "github.com/tesarwijaya/night-owl/internal/entry-point/rest/controller/player"
 )
 
 type ResolverFn func(svc *service.MockPlayerService)
