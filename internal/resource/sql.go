@@ -1,4 +1,4 @@
-package databases
+package resource
 
 import (
 	"database/sql"

@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/tesarwijaya/night-owl/internal/config"
-	"github.com/tesarwijaya/night-owl/internal/databases"
 	healthz_service "github.com/tesarwijaya/night-owl/internal/domain/healthz/service"
 	player_repository "github.com/tesarwijaya/night-owl/internal/domain/player/repository"
 	player_service "github.com/tesarwijaya/night-owl/internal/domain/player/service"
@@ -17,6 +16,7 @@ import (
 	healthz_controller "github.com/tesarwijaya/night-owl/internal/entry-point/rest/controller/healthz"
 	player_controller "github.com/tesarwijaya/night-owl/internal/entry-point/rest/controller/player"
 	team_controller "github.com/tesarwijaya/night-owl/internal/entry-point/rest/controller/team"
+	"github.com/tesarwijaya/night-owl/internal/resource"
 	"go.uber.org/fx"
 )
 
@@ -25,7 +25,7 @@ func main() {
 		fx.Provide(
 			rest.NewRestServer,
 			config.NewConfig,
-			databases.NewSQLConnection,
+			resource.NewSQLConnection,
 			healthz_controller.NewHealthzController,
 			healthz_service.NewHealthzService,
 			player_controller.NewPlayerController,
