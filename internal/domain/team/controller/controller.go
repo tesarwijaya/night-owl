@@ -46,6 +46,18 @@ func (c *TeamController) FindAll(ec echo.Context) error {
 	return ec.JSON(http.StatusOK, res)
 }
 
+// FindByID godoc
+// @Summary      Get team by id
+// @Description  get team by id
+// @Tags         Team
+// @Accept       json
+// @Produce      json
+// @param        id path int true "team id"
+// @Success      200  {object}  model.TeamModel
+// @Failure      400  {object}  echo.HTTPError
+// @Failure      404  {object}  echo.HTTPError
+// @Failure      500  {object}  echo.HTTPError
+// @Router       /team/:id [get]
 func (c *TeamController) FindByID(ec echo.Context) error {
 	idParam := ec.Param("id")
 	id, err := strconv.ParseInt(idParam, 10, 64)
@@ -61,6 +73,18 @@ func (c *TeamController) FindByID(ec echo.Context) error {
 	return ec.JSON(http.StatusOK, res)
 }
 
+// Insert godoc
+// @Summary      Insert team
+// @Description  insert team
+// @Tags         Team
+// @Accept       json
+// @Produce      json
+// @param        id body model.TeamModel true "body"
+// @Success      200  {object}  model.TeamModel
+// @Failure      400  {object}  echo.HTTPError
+// @Failure      404  {object}  echo.HTTPError
+// @Failure      500  {object}  echo.HTTPError
+// @Router       /team [post]
 func (c *TeamController) Insert(ec echo.Context) error {
 	var payload model.TeamModel
 
